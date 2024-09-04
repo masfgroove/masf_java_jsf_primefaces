@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	template="WEB-INF/template/Layout.xhtml">
+
+	<ui:define name="titulo">
+	Cadastro de Investimentos
+</ui:define>
+
+	<ui:define name="conteudo">
+		<f:metadata>
+			<f:viewAction action="#{gestaoInvestimentosBean.todasInvestimentos}" />
+
+		</f:metadata>
+
+		<h:form id="frm">
+			<p:messages id="messages" />
+
+<!-- Exibindo o total no painel acima da tabela -->
+            <p:panel header="Resumo">
+                <h:outputText value="Total Lucro em Reais: " />
+                <h:outputText value="#{gestaoInvestimentosBean.somaLucroReais}">
+                    <f:convertNumber type="currency" currencySymbol="R$" />
+                </h:outputText>
+            </p:panel>
+          
+			<p:toolbar id="toolbar">
+				<f:facet name="left">
+					<p:inputText id="termoPesquisa"
+						placeholder="Digite aqui um termo para pesquisa..." size="30"
+						value="#{gestaoInvestimentosBean.termoPesquisa}" />
+
+					<p:commandButton value="Pesquisar" icon="pi pi-search"
+						actionListener="#{gestaoInvestimentosBean.pesquisar}"
+						update="investimentosDataTable messages"
+						process="@this termoPesquisa" />
+
+
+					<span class="ui-separator" style="margin-right: 10px;"> <span
+						class="ui-icon ui-icon-grip-dotted-vertical" />
+					</span>
+
+					<p:commandButton value="Nova" icon="pi pi-plus"
+						actionListener="#{gestaoInvestimentosBean.prepararNovaInvestimento}"
+						oncomplete="PF('investimentoDialogWidgetVar').show()"
+						update="investimentoDialog" process="@this">
+						<p:resetInput target="investimentoDialog" />
+					</p:commandButton>
+
+
+					<span class="ui-separator" style="margin-right: 10px;"> <span
+						class="ui-icon ui-icon-grip-dotted-vertical" />
+					</span>
+					<p:commandButton title="Editar" icon="pi pi-pencil"
+						disabled="#{not gestaoInvestimentosBean.investimentoSeleciona}"
+						oncomplete="PF('investimentoDialogWidgetVar').show()"
+						update="investimentoDialog" process="@this">
+						<p:resetInput target="investimentoDialog" />
+					</p:commandButton>
+
+					<span class="ui-separator" style="margin-right: 10px;"> <span
+						class="ui-icon ui-icon-grip-dotted-vertical" />
+					</span>
+					<p:commandButton title="Excluir" icon="pi pi-trash"
+						disabled="#{not gestaoInvestimentosBean.investimentoSeleciona}"
+						actionListener="#{gestaoInvestimentosBean.excluir}"
+						update="messages investimentosDataTable toolbar" process="@this">
+						<p:confirm icon="ui-icon-alert" header="Confirmação de exclusão"
+							message="Posso excluir a investimento?" />
+					</p:commandButton>
+
+
+					<span class="ui-separator" style="margin-right: 10px;"> <span
+						class="ui-icon ui-icon-grip-dotted-vertical" />
+					</span>
+					<p:commandButton title="Exportar para o Excel"
+						icon="pi pi-file-excel" ajax="false">
+						<p:dataExporter type="xls" target="investimentosDataTable"
+							fileName="Investimentos" />
+					</p:commandButton>
+				</f:facet>
+			</p:toolbar>
+
+			<p:spacer height="20px" />
+
+			<p:dataTable id="investimentosDataTable"
+				value="#{gestaoInvestimentosBean.listaInvestimentos}"
+				var="investimento" emptyMessage="Nenhuma informação a ser exibida"
+				paginator="true" rows="10" paginatorPosition="bottom"
+				selectionMode="single"
+				selection="#{gestaoInvestimentosBean.investimento}"
+				rowKey="#{investimento.id}">
+
+				<p:ajax event="rowSelect" update="frm:toolbar" />
+
+				<p:ajax event="rowUnselect" update="frm:toolbar" />
+
+				<p:column headerText="Razão social"
+					sortBy="#{investimento.razaoSocial}">
+					<h:outputText value="#{investimento.razaoSocial}" />
+				</p:column>
+
+				<p:column headerText="Data" sortBy="#{investimento.data}">
+					<h:outputText value="#{investimento.data}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Entrada" sortBy="#{investimento.entrada}">
+					<h:outputText value="#{investimento.entrada}">
+						<f:convertNumber type="currency" currencySymbol="R$" />
+					</h:outputText>
+				</p:column>
+
+			<p:column headerText="%">
+    <h:outputText value="#{investimento.porcentagem}">
+        <f:convertNumber type="number" minFractionDigits="2"
+                         maxFractionDigits="2"  />
+    </h:outputText>
+</p:column>
+
+
+
+				<p:column headerText="Lucro em Dólar"
+					sortBy="#{investimento.lucroDolar}">
+					<h:outputText value="#{investimento.lucroDolar}">
+						<f:convertNumber type="currency" currencySymbol="$" />
+					</h:outputText>
+				</p:column>
+
+
+				<p:column headerText="Lucro em Reais"
+					sortBy="#{investimento.lucroReais}">
+					<h:outputText value="#{investimento.lucroReais}">
+						<f:convertNumber type="currency" currencySymbol="R$" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Total em Dólares"
+					sortBy="#{investimento.totalDolares}">
+					<h:outputText value="#{investimento.totalDolares}">
+						<f:convertNumber type="currency" currencySymbol="$" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Dias" sortBy="#{investimento.dias}">
+					<h:outputText value="#{investimento.dias}" />
+				</p:column>
+
+				<p:column headerText="Dólar Hoje" sortBy="#{investimento.dolarHoje}">
+					<h:outputText value="#{investimento.dolarHoje}">
+						<f:convertNumber type="currency" currencySymbol="$" />
+					</h:outputText>
+				</p:column>
+
+				<p:column headerText="Total em Reais"
+					sortBy="#{investimento.totalReais}">
+					<h:outputText value="#{investimento.totalReais}">
+						<f:convertNumber type="currency" currencySymbol="R$" />
+					</h:outputText>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:dialog id="investimentoDialog" header="Nova investimento"
+				widgetVar="investimentoDialogWidgetVar" modal="true"
+				resizable="false" closeOnEscape="true">
+				<p:messages id="investimentoMessages" />
+
+				<p:defaultCommand target="salvarCommandButton"
+					scope="investimentoDialog" />
+
+				<h:panelGrid id="investimentoPanelGrid" columns="2"
+					rendered="#{gestaoInvestimentosBean.investimento ne null}">
+					<p:outputLabel value="Razão social: " for="razaoSocial" />
+					<p:inputText id="razaoSocial" size="80" maxlength="120"
+						value="#{gestaoInvestimentosBean.investimento.razaoSocial}"
+						required="true"
+             requiredMessage="A razão social é obrigatória." />
+
+
+					<p:outputLabel value="Data: " for="data" />
+					<p:calendar id="data" pattern="dd/MM/yyyy" size="30"
+						value="#{gestaoInvestimentosBean.investimento.data}" />
+
+					<p:outputLabel for="entrada" value="Entrada" />
+					<p:inputText id="entrada"
+						value="#{gestaoInvestimentosBean.investimento.entrada}" 
+						required="true"
+             requiredMessage="Valor de entrada obrigatório e no padrão R$ " >
+						<f:convertNumber type="currency" currencySymbol="R$" />
+					</p:inputText>
+
+					<p:outputLabel for="lucroDolar" value="Lucro em Dólar" />
+					<p:inputText id="lucroDolar"
+						value="#{gestaoInvestimentosBean.investimento.lucroDolar}"
+						required="true"
+             requiredMessage="Digite o quanto lucro no trade e no padrão $ ">
+						<f:convertNumber type="currency" currencySymbol="$" />
+					</p:inputText>
+
+
+					<p:outputLabel for="dias" value="Dias" />
+					<p:inputText id="dias"
+						value="#{gestaoInvestimentosBean.investimento.dias}"
+						required="true"
+             requiredMessage="Informe se é primeiro, segundo, etc " />
+
+					<p:outputLabel for="dolarHoje" value="Dólar Hoje" />
+					<p:inputText id="dolarHoje"
+						value="#{gestaoInvestimentosBean.investimento.dolarHoje}">
+						<f:convertNumber type="currency" currencySymbol="$" />
+					</p:inputText>
+
+
+					<h:outputLabel />
+					<p:commandButton id="salvarCommandButton" value="Salvar"
+						actionListener="#{gestaoInvestimentosBean.salvar}"
+						update="investimentoPanelGrid investimentoMessages"
+						oncomplete="if (!args.validationFailed) PF('investimentoDialogWidgetVar').hide()"
+						process="investimentoDialog" />
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
